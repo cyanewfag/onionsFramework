@@ -36,6 +36,10 @@ local function setVar(var, value, index)
     end
 end
 
+local function grabColor(var)
+    return color.new(checkVar(var, 3), checkVar(var, 4), checkVar(var, 5), checkVar(var, 6))
+end
+
 local function onionCheckbox(x, y, z, text, var)
     local enabled = checkVar(var);
 
@@ -118,7 +122,7 @@ local function onionColorPicker(x, y, z, text, var)
     local opened = checkVar(var);
     local textSize = renderer.get_text_size(text, fonts[2]);
 
-    renderer.filled_rect( x, y, z, z, color.new(checkVar(var, 3), checkVar(var, 4), checkVar(var, 5), checkVar(var, 6)));
+    renderer.filled_rect( x, y, z, z, grabColor(var));
     renderer.rect( x, y, z, z, colors[3]);
     renderer.text(x + z + 6, y + ((z / 2) - (textSize.y / 2)), text, colors[6], fonts[2]);
 
@@ -128,7 +132,7 @@ local function onionColorPicker(x, y, z, text, var)
         end
     else
         if (opened) then
-            if (mousePos.x <= x + z + 6 or mousePos.x >= x + z + 306 or mousePos.y <= y or mousePos.y >= y + 200) then
+            if (mousePos.x <= x + z + 6 or mousePos.x >= x + z + 166 or mousePos.y <= y or mousePos.y >= y + 122) then
                 if (keys.key_pressed(0x01)) then
                     setVar(var, false);
                 end
@@ -139,7 +143,7 @@ local function onionColorPicker(x, y, z, text, var)
     if (opened) then
         renderer.filled_rect( x + z + 6, y, 160, 122, colors[1]);
         renderer.rect( x + z + 6, y, 160, 122, colors[3]);
-        renderer.filled_rect( x + z + 6 + 138, y + 6, 16, 108, color.new(checkVar(var, 3), checkVar(var, 4), checkVar(var, 5), checkVar(var, 6)));
+        renderer.filled_rect( x + z + 6 + 138, y + 6, 16, 108, grabColor(var));
         renderer.rect( x + z + 6 + 138, y + 6, 16, 108, colors[3]);
 
         onionIntSlider(x + z + 12, y + 12, 100, "Red Value", "onion_hud_color", 0, 255, 3);
@@ -190,7 +194,7 @@ local function drawHUD()
         local text = zapped.username .. " | " .. zapped.userid .. " | " .. zapped.users_online;
         local textSize = renderer.get_text_size(text, fonts[2]);
         renderer.filled_rect(hudInfo[1], hudInfo[2] + 2, textSize.x + 12, textSize.y + 4, color.new(20, 20, 20, 150));
-        renderer.filled_rect(hudInfo[1], hudInfo[2], textSize.x + 12, 2, color.new(checkVar("onion_hud_color", 3), checkVar("onion_hud_color", 4), checkVar("onion_hud_color", 5), checkVar("onion_hud_color", 6)));
+        renderer.filled_rect(hudInfo[1], hudInfo[2], textSize.x + 12, 2, grabColor("onion_hud_color"));
         renderer.text(hudInfo[1] + 6, hudInfo[2] + 4, text, colors[6], fonts[2]);
     end
 end
