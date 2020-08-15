@@ -5,6 +5,7 @@ local mousePos;
 local mouseDown = { false, 0, 0 };
 local keyArray = { {0x41, "A"}, {0x42, "B"}, {0x43, "C"}, {0x44, "D"}, {0x45, "E"}, {0x46, "F"}, {0x47, "G"}, {0x48, "H"}, {0x49, "I"}, {0x4A, "J"}, {0x4B, "K"}, {0x4C, "L"}, {0x4D, "M"}, {0x4E, "N"}, {0x4F, "O"}, {0x50, "P"}, {0x51, "Q"}, {0x52, "R"}, {0x53, "S"}, {0x54, "T"}, {0x55, "U"}, {0x56, "V"}, {0x57, "W"}, {0x58, "X"}, {0x59, "Y"}, {0x5A, "Z"} };
 local keyPressTable = {};
+local drawColor = { false, "", 0, 0 }
 
 local vars = {
     { "onion_gui_enabled", true, 0x4D, "M", false },
@@ -131,27 +132,34 @@ local function onionColorPicker(x, y, z, text, var)
     if (mousePos.x >= x and mousePos.x <= x + z + textSize.x + 6 and mousePos.y >= y and mousePos.y <= y + z) then
         if (keys.key_pressed(0x01)) then
             setVar(var, not checkVar(var));
+            drawColor[1] = checkVar(var);
+            drawColor[2] = var;
+            drawColor[3] = x + z + 6;
+            drawColor[4] = y;
         end
     else
         if (opened) then
             if (mousePos.x <= x + z + 6 or mousePos.x >= x + z + 166 or mousePos.y <= y or mousePos.y >= y + 122) then
                 if (keys.key_pressed(0x01)) then
                     setVar(var, false);
+                    drawColor[1] = false;
                 end
             end
         end
     end
+end
 
-    if (opened) then
-        renderer.filled_rect( x + z + 6, y, 160, 122, colors[1]);
-        renderer.rect( x + z + 6, y, 160, 122, colors[3]);
-        renderer.filled_rect( x + z + 6 + 138, y + 6, 16, 108, grabColor(var));
-        renderer.rect( x + z + 6 + 138, y + 6, 16, 108, colors[3]);
+local function drawColorPicker()
+    if (drawColor[1]) then
+        renderer.filled_rect( drawColor[3], drawColor[4], 160, 122, colors[1]);
+        renderer.rect( drawColor[3], drawColor[4], 160, 122, colors[3]);
+        renderer.filled_rect(drawColor[3] + 138, drawColor[4] + 6, 16, 108, grabColor(drawColor[2]));
+        renderer.rect( drawColor[3] + 138, drawColor[4] + 6, 16, 108, colors[3]);
 
-        onionIntSlider(x + z + 12, y + 12, 100, "Red Value", "onion_hud_color", 0, 255, 3);
-        onionIntSlider(x + z + 12, y + 38, 100, "Green Value", "onion_hud_color", 0, 255, 4);
-        onionIntSlider(x + z + 12, y + 64, 100, "Blue Value", "onion_hud_color", 0, 255, 5);
-        onionIntSlider(x + z + 12, y + 90, 100, "Alpha Value", "onion_hud_color", 0, 255, 6);
+        onionIntSlider(drawColor[3] + 6, drawColor[4] + 12, 100, "Red Value", drawColor[2], 0, 255, 3);
+        onionIntSlider(drawColor[3] + 6, drawColor[4] + 38, 100, "Green Value", drawColor[2], 0, 255, 4);
+        onionIntSlider(drawColor[3] + 6, drawColor[4] + 64, 100, "Blue Value", drawColor[2], 0, 255, 5);
+        onionIntSlider(drawColor[3] + 6, drawColor[4] + 90, 100, "Alpha Value", drawColor[2], 0, 255, 6);
     end
 end
 
@@ -218,6 +226,10 @@ end
 local function inputHandler()
     if (keys.key_pressed(checkVar("onion_gui_enabled", 3))) then
         guiOpened = not guiOpened;
+        
+        if (guiOpened == false) then
+            drawColor[1] = false;
+        end
     end
 
     mousePos = keys.get_mouse();
@@ -257,4 +269,5 @@ function on_render()
     inputHandler();
     drawGUI();
     drawHUD();
+    drawColorPicker();
 end
