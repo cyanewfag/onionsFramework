@@ -3,7 +3,7 @@ local colors = { color.new(20, 20, 20, 255), color.new(30, 30, 30, 255), color.n
 local fonts = { renderer.create_font("Verdana", 10, false), renderer.create_font("Verdana", 12, false) };
 local mousePos;
 local mouseDown = { false, 0, 0 };
-local keyArray = { {0x41, "A"}, {0x42, "B"}, {0x43, "C"}, {0x44, "D"}, {0x45, "E"}, {0x46, "F"}, {0x47, "G"}, {0x48, "H"}, {0x49, "I"}, {0x4A, "J"}, {0x4B, "K"}, {0x4C, "L"}, {0x4D, "M"}, {0x4E, "N"}, {0x4F, "O"}, {0x50, "P"}, {0x51, "Q"}, {0x52, "R"}, {0x53, "S"}, {0x54, "T"}, {0x55, "U"}, {0x56, "V"}, {0x57, "W"}, {0x58, "X"}, {0x59, "Y"}, {0x5A, "Z"} };
+local keyArray = { {0x41, "A"}, {0x42, "B"}, {0x43, "C"}, {0x44, "D"}, {0x45, "E"}, {0x46, "F"}, {0x47, "G"}, {0x48, "H"}, {0x49, "I"}, {0x4A, "J"}, {0x4B, "K"}, {0x4C, "L"}, {0x4D, "M"}, {0x4E, "N"}, {0x4F, "O"}, {0x50, "P"}, {0x51, "Q"}, {0x52, "R"}, {0x53, "S"}, {0x54, "T"}, {0x55, "U"}, {0x56, "V"}, {0x57, "W"}, {0x58, "X"}, {0x59, "Y"}, {0x5A, "Z"}, {0x20, " "}, {0xBC, ","}, {0xBD, "-"}, {0xBE, "."}, {0xBB, "+"}, {0xDE, "\""}, {0xDC, "|"} };
 local keyPressTable = {};
 local drawColor = { false, "", 0, 0 }
 
@@ -12,7 +12,8 @@ local vars = {
     { "onion_gui_draggable", true },
     { "onion_hud_enabled", true },
     { "onion_hud_drag", false },
-    { "onion_hud_color", false, 40, 175, 247, 255 }
+    { "onion_hud_color", false, 40, 175, 247, 255 },
+    { "onion_hud_text_divider", "|", false }
 };
 
 local function checkVar(var, index)
@@ -41,6 +42,79 @@ end
 
 local function grabColor(var)
     return color.new(checkVar(var, 3), checkVar(var, 4), checkVar(var, 5), checkVar(var, 6))
+end
+
+local function onionTextbox(x, y, w, var, limit)
+    renderer.rect( x, y, w, 18, colors[2]);
+    renderer.filled_rect( x + 1, y + 1, w - 2, 16, colors[5]);
+    renderer.rect( x + 3, y + 3, w - 6, 12, colors[2]);
+    renderer.filled_rect( x + 4, y + 4, w - 8, 10, colors[1]);
+
+    if (mousePos.x >= x and mousePos.x <= x + w and mousePos.y >= y and mousePos.y <= y + 18) then
+        if (mouseDown[1]) then
+            renderer.filled_rect( x + 5, y + 5, w - 10, 8, colors[5]);
+        else
+            renderer.filled_rect( x + 5, y + 5, w - 10, 8, colors[4]);
+        end
+
+        if (keys.key_pressed(0x01)) then
+            setVar(var, true, 3);
+        end
+    else
+        if (keys.key_pressed(0x01)) then
+            setVar(var, false, 3);
+        end
+
+        if (checkVar(var, 3)) then
+            renderer.filled_rect( x + 5, y + 5, w - 10, 8, colors[5]);
+        end
+    end
+
+    if (checkVar(var, 3)) then
+        if (keys.key_pressed(0x08)) then
+            setVar(var, string.sub(checkVar(var), 1, -2));
+        end
+
+        if (keys.key_pressed(0x0D) or keys.key_pressed(0x09)) then
+            setVar(var, false, 3);
+        end
+    end
+
+    if (checkVar(var, 3)) then
+        local stringAdder = "";
+        if (#keyPressTable > 0) then
+            for i = 1, #keyPressTable do
+                stringAdder = stringAdder .. keyPressTable[i][2];
+            end
+        end
+
+        if (stringAdder ~= nil) then
+            if (limit == nil) then
+                if (keys.key_down(0x10)) then
+                    setVar(var, checkVar(var) .. stringAdder);
+                else
+                    setVar(var, checkVar(var) .. string.lower(stringAdder));
+                end
+            elseif (#checkVar(var) + #stringAdder <= limit) then
+                if (keys.key_down(0x10)) then
+                    setVar(var, checkVar(var) .. stringAdder);
+                else
+                    setVar(var, checkVar(var) .. string.lower(stringAdder));
+                end
+            end
+        end
+    end
+
+    local a = renderer.get_text_size("J", fonts[2]);
+    local allowedChars = (w - 10) / a.x;
+
+    local text = checkVar(var);
+    if (#text > allowedChars) then
+        text = string.sub(text, 1, allowedChars);
+    end
+
+    local textSize = renderer.get_text_size(text, fonts[2]);
+    renderer.text(x + 5, y + (9 - (textSize.y / 2)), text, colors[6], fonts[2]);
 end
 
 local function onionCheckbox(x, y, z, text, var)
@@ -207,15 +281,17 @@ local function drawGUI()
         onionCheckbox( guiInfo[1] + 10, guiInfo[2] + 30, 18, "Draggable", "onion_gui_draggable" );
         onionCheckbox( guiInfo[1] + 10, guiInfo[2] + 54, 18, "Enable HUD", "onion_hud_enabled" );
         onionCheckbox( guiInfo[1] + 10, guiInfo[2] + 78, 18, "Draggable HUD", "onion_hud_drag" );
-        onionColorPicker( guiInfo[1] + 10, guiInfo[2] + 102, 18, "HUD Color", "onion_hud_color");
-        onionKeybind(guiInfo[1] + 10, guiInfo[2] + 126, "peepee", "onion_gui_enabled")
+        onionColorPicker( guiInfo[1] + 10, guiInfo[2] + 102, 18, "HUD Color", "onion_hud_color" );
+        onionKeybind( guiInfo[1] + 10, guiInfo[2] + 126, "peepee", "onion_gui_enabled" );
+        onionTextbox( guiInfo[1] + 10, guiInfo[2] + 150, 100, "onion_hud_text_divider", 1 );
     end
 end
 
 local hudInfo = { 10, 10 }
 local function drawHUD()
     if (checkVar("onion_hud_enabled")) then
-        local text = zapped.username .. " | " .. zapped.userid .. " | " .. zapped.users_online;
+        local divide = " " .. checkVar("onion_hud_text_divider") .. " ";
+        local text = zapped.username .. divide .. zapped.userid .. divide .. zapped.users_online;
         local textSize = renderer.get_text_size(text, fonts[2]);
         renderer.filled_rect(hudInfo[1], hudInfo[2] + 2, textSize.x + 12, textSize.y + 4, color.new(20, 20, 20, 150));
         renderer.filled_rect(hudInfo[1], hudInfo[2], textSize.x + 12, 2, grabColor("onion_hud_color"));
