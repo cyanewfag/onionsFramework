@@ -206,7 +206,7 @@ local function onionColorPicker(x, y, z, text, var)
     renderer.rect( x, y, z, z, colors[3]);
     renderer.text(x + z + 6, y + ((z / 2) - (textSize.y / 2)), text, colors[6], fonts[2]);
 
-    if (mousePos.x >= x and mousePos.x <= x + z + textSize.x + 6 and mousePos.y >= y and mousePos.y <= y + z) then
+    if (mousePos.x >= x and mousePos.x <= x + z and mousePos.y >= y and mousePos.y <= y + z) then
         if (keys.key_pressed(0x01)) then
             setVar(var, not checkVar(var));
             drawColor[1] = checkVar(var);
@@ -216,7 +216,7 @@ local function onionColorPicker(x, y, z, text, var)
         end
     else
         if (opened) then
-            if (mousePos.x <= x + z + 6 or mousePos.x >= x + z + 166 or mousePos.y <= y or mousePos.y >= y + 122) then
+            if (mousePos.x < x + z + 6 or mousePos.x > x + z + 166 or mousePos.y < y or mousePos.y > y + 122) then
                 if (keys.key_pressed(0x01)) then
                     setVar(var, false);
                     drawColor[1] = false;
