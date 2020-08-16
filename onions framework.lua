@@ -13,7 +13,8 @@ local vars = {
     { "onion_hud_enabled", true },
     { "onion_hud_drag", false },
     { "onion_hud_color", false, 40, 175, 247, 255 },
-    { "onion_hud_text_divider", "|", false }
+    { "onion_hud_text_divider", "|", false },
+    { "onion_hud_texttest", "penis", false }
 };
 
 local function checkVar(var, index)
@@ -44,7 +45,7 @@ local function grabColor(var)
     return color.new(checkVar(var, 3), checkVar(var, 4), checkVar(var, 5), checkVar(var, 6))
 end
 
-local function onionTextbox(x, y, w, var, limit)
+local function onionTextbox(x, y, w, text, var, limit)
     renderer.rect( x, y, w, 18, colors[2]);
     renderer.filled_rect( x + 1, y + 1, w - 2, 16, colors[5]);
     renderer.rect( x + 3, y + 3, w - 6, 12, colors[2]);
@@ -108,13 +109,15 @@ local function onionTextbox(x, y, w, var, limit)
     local a = renderer.get_text_size("J", fonts[2]);
     local allowedChars = (w - 10) / a.x;
 
-    local text = checkVar(var);
-    if (#text > allowedChars) then
-        text = string.sub(text, 1, allowedChars);
+    local texts = checkVar(var);
+    if (#texts > allowedChars) then
+        texts = string.sub(texts, 1, allowedChars);
     end
 
+    local textSize = renderer.get_text_size(texts, fonts[2]);
+    renderer.text(x + 5, y + (9 - (textSize.y / 2)), texts, colors[6], fonts[2]);
     local textSize = renderer.get_text_size(text, fonts[2]);
-    renderer.text(x + 5, y + (9 - (textSize.y / 2)), text, colors[6], fonts[2]);
+    renderer.text(x + w + 6, y + (9 - (textSize.y / 2)), text, colors[6], fonts[2]);
 end
 
 local function onionCheckbox(x, y, z, text, var)
@@ -269,6 +272,7 @@ local function onionKeybind(x, y, text, var)
     end
 
     renderer.text(x + 8, y + ((18 / 2) - (textSize.y / 2)), checkVar(var, 4), colors[6], fonts[2]);
+    renderer.text(x + 22 + textSize.x, y + ((18 / 2) - (textSize.y / 2)), text, colors[6], fonts[2]);
 end
 
 local function drawGUI()
@@ -282,8 +286,9 @@ local function drawGUI()
         onionCheckbox( guiInfo[1] + 10, guiInfo[2] + 54, 18, "Enable HUD", "onion_hud_enabled" );
         onionCheckbox( guiInfo[1] + 10, guiInfo[2] + 78, 18, "Draggable HUD", "onion_hud_drag" );
         onionColorPicker( guiInfo[1] + 10, guiInfo[2] + 102, 18, "HUD Color", "onion_hud_color" );
-        onionKeybind( guiInfo[1] + 10, guiInfo[2] + 126, "peepee", "onion_gui_enabled" );
-        onionTextbox( guiInfo[1] + 10, guiInfo[2] + 150, 100, "onion_hud_text_divider", 1 );
+        onionKeybind( guiInfo[1] + 10, guiInfo[2] + 126, "GUI Key", "onion_gui_enabled" );
+        onionTextbox( guiInfo[1] + 10, guiInfo[2] + 150, 100, "HUD Divider", "onion_hud_text_divider", 1 );
+        onionTextbox( guiInfo[1] + 10, guiInfo[2] + 174, 100, "Test Textbox", "onion_hud_texttest" );
     end
 end
 
